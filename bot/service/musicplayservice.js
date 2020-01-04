@@ -51,7 +51,7 @@ class MusicPlayService {
     async leave() {
         this.skipAll();
         if (this.musicServer.voiceChannel) {
-            this.musicServer.voiceChannel.leave();
+            await this.musicServer.voiceChannel.leave();
         }
         this.musicServer.connection = null;
         this.musicServer.voiceChannel = null;
@@ -75,7 +75,7 @@ class MusicPlayService {
         } catch (err) {
             this.musicServer.voiceChannel = null;
 			throw new Error('Unable to connect to the channel');
-		}
+        }
     }
 
     /**
@@ -83,17 +83,24 @@ class MusicPlayService {
      */
     async skip() {
         if (this.musicServer.songs.length != 0 && this.musicServer.connection) {
-            this.musicServer.connection.dispatcher.end();
+            await this.musicServer.connection.dispatcher.end();
         }
     }
 
     /**
      * terminate and delete all the song in the playlist
      */
-    async skipAll() {
+    skipAll() {
         if (this.musicServer.songs.length != 0 && this.musicServer.connection) {
             this.musicServer.songs = [];
             this.musicServer.connection.dispatcher.end();
+        }
+    }
+
+    setVolume(volumn) {
+        this.musicServer.volume = volumn;
+        if (this.musicServer.connection && this.musicServer.connection.dispatcher) {
+            this.musicServer.connection.dispatcher.setVolumeLogarithmic(this.musicServer.volume / 5);
         }
     }
 
@@ -101,10 +108,11 @@ class MusicPlayService {
      * Play the song on the top of the list
      */
     async execute() {
-        console.log(this.musicServer.songs);
-        if (this.musicServer.songs.length != 0) { 
+        if (this.musicServer.songs.length != 0) {
+            console.log('start to play music: ', this.musicServer.songs[0]);
             const dispatcher = this.musicServer.connection.playStream(ytdl(this.musicServer.songs[0].url))
                 .on('end', () => {
+                    console.log('music ended: ', this.musicServer.songs[0]);
                     this.musicServer.songs.shift();
                     this.execute();
                 })

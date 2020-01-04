@@ -10,7 +10,7 @@ class MusicBot extends CommandHandler {
             voiceChannel: null,
             connection: null,
             songs: [],
-            volume: 5
+            volume: 3
         });
 
         this.on('!skip', (msg) => {
@@ -60,6 +60,22 @@ class MusicBot extends CommandHandler {
             this.musicPlayService.leave();
         });
 
+        this.on('!volume', (msg) => {
+            const volume = parseFloat(msg.content.split(' ')[1]);
+            if (volume) {
+                if (volume > 5) {
+                    return msg.reply('Why do you want to hurt your ear?');
+                } else {
+                    this.musicPlayService.setVolume(volume);
+                    const occupied = '#';
+                    const empty = '-';
+                    const volumePercentage = Math.ceil(volume / 5 * 10);
+                    return msg.channel.send('Current Volume: [' + occupied.repeat(volumePercentage) 
+                                    + empty.repeat(10 - volumePercentage) + ']');
+                }
+            }
+        })
+
         this.on('!skipall', async (msg) => { 
             if (this.musicPlayService.getPlayList().length == 0) {
                 return msg.reply('There is no song that I could skip!');
@@ -68,8 +84,8 @@ class MusicBot extends CommandHandler {
         });
 
         this.on('!playlist', async (msg) => {
-            let result = ['Current Playlist: \n'];
             let songs = this.musicPlayService.getPlayList();
+            let result = [`Current Playlist (${ songs.length } Songs in the list): \n`];
             for (var i = 0; i < songs.length; i++) {
                 result.push((i + 1) + ". " + songs[i].title + "\n");
             }
