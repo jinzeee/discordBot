@@ -97,8 +97,12 @@ class MusicPlayService {
         }
     }
 
-    setVolume(volumn) {
-        this.musicServer.volume = volumn;
+    /**
+     * Set the volume of the audio
+     * @param {float} volume
+     */
+    setVolume(volume) {
+        this.musicServer.volume = volume;
         if (this.musicServer.connection && this.musicServer.connection.dispatcher) {
             this.musicServer.connection.dispatcher.setVolumeLogarithmic(this.musicServer.volume / 5);
         }
