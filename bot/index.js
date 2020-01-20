@@ -15,7 +15,7 @@ client.on('message', msg => {
     if (msg.author.bot || !msg.content.startsWith(prefix)) {
         return;
     }
-    let cmd = msg.content.split(' ')[0];
+    const cmd = msg.content.split(' ')[0].slice(1).toLowerCase();
     musicbot.handle(cmd, msg);
 });
 

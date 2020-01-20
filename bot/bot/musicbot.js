@@ -1,6 +1,7 @@
 
 const { CommandHandler } = require('../adapter/commandhandler');
 const { MusicPlayService } = require('../service/musicplayservice');
+const { Queue } = require('../utils/queue');
 
 class MusicBot extends CommandHandler {
     constructor() {
@@ -9,18 +10,20 @@ class MusicBot extends CommandHandler {
         this.musicPlayService = new MusicPlayService({
             voiceChannel: null,
             connection: null,
-            songs: [],
-            volume: 3
+            songs: new Queue(),
+            volume: 3,
+            status: 'defualt',
+            vote: false
         });
 
-        this.on('!skip', (msg) => {
+        this.on('skip', (msg) => {
             if (this.musicPlayService.getPlayList().length == 0) {
                 return msg.reply('There is no song that I could skip!');
             }
             this.musicPlayService.skip();
         });
 
-        this.on('!play', (msg) => {
+        this.on('play', (msg) => {
             const voiceChannel = msg.member.voiceChannel;
             if (!voiceChannel) {
                 return msg.reply('You need to be in a voice channel to play music!');
@@ -29,10 +32,10 @@ class MusicBot extends CommandHandler {
                 return msg.reply('I need the permissions to join and speak in your voice channel');
             }
             const url = msg.content.split(' ')[1];
-            this.musicPlayService.skipPlay(url, voiceChannel);
+            this.musicPlayService.play(url, voiceChannel);
         });
 
-        this.on('!add', async (msg) => {
+        this.on('add', async (msg) => {
             const voiceChannel = msg.member.voiceChannel;
             if (!voiceChannel) {
                 return msg.reply('You need to be in a voice channel to play music!');
@@ -45,7 +48,7 @@ class MusicBot extends CommandHandler {
             return msg.reply("Your song has been added to the playlist");
         });
 
-        this.on('!join', async (msg) => { 
+        this.on('join', async (msg) => { 
             const voiceChannel = msg.member.voiceChannel;
             if (!voiceChannel) {
                 return msg.reply('You need to be in a voice channel!');
@@ -56,13 +59,16 @@ class MusicBot extends CommandHandler {
             this.musicPlayService.join(voiceChannel);
         });
 
-        this.on('!leave', async () => { 
+        this.on('leave', async () => { 
             this.musicPlayService.leave();
         });
 
-        this.on('!volume', (msg) => {
-            const volume = parseFloat(msg.content.split(' ')[1]);
-            if (volume) {
+        this.on('volume', (msg) => {
+            let volume = parseFloat(msg.content.split(' ')[1]);
+            if (!isNaN(volume)) {
+                if (volume < 0) {
+                    volume = 0;
+                }
                 if (volume > 5) {
                     return msg.reply('Why do you want to hurt your ear?');
                 } else {
@@ -76,14 +82,14 @@ class MusicBot extends CommandHandler {
             }
         })
 
-        this.on('!skipall', async (msg) => { 
+        this.on('removeall', async (msg) => { 
             if (this.musicPlayService.getPlayList().length == 0) {
                 return msg.reply('There is no song that I could skip!');
             }
             this.musicPlayService.skipAll();
         });
 
-        this.on('!playlist', async (msg) => {
+        this.on('playlist', async (msg) => {
             let songs = this.musicPlayService.getPlayList();
             let result = [`Current Playlist (${ songs.length } Songs in the list): \n`];
             for (var i = 0; i < songs.length; i++) {

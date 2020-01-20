@@ -1,5 +1,3 @@
-"use strict"
-
 const ytdl = require('ytdl-core');
 
 class MusicPlayService {
@@ -10,8 +8,8 @@ class MusicPlayService {
     /**
      * get all the song currently in the queue
      */
-    async getPlayList() {
-        return this.musicServer.songs;
+    getPlayList() {
+        return this.musicServer.songs.toList();
     }
 
     /**
@@ -23,14 +21,14 @@ class MusicPlayService {
         if (!url) {
             return;
         }
-        await this.skipAll();
+        this.skipAll();
         await this.join(voiceChannel);
         await this.addSong(url);
-        this.execute();
+        await this.execute();
     }
 
     /**
-     * add a song to current playlist
+     * add a song to the end of the current playlist
      * @param {string} url youtube url
      * @param {*} voiceChannel 
      */
@@ -38,10 +36,28 @@ class MusicPlayService {
         if (!url) {
             return;
         }
-        if (this.musicServer.songs.length == 0) {
+        if (this.musicServer.songs.isEmpty()) {
             this.skipPlay(url, voiceChannel);
         } else {
             this.addSong(url);
+        }
+    }
+
+    /**
+     * add a song to the start of the current playlist
+     * @param {string} url 
+     * @param {*} voiceChannel 
+     */
+    async play(url, voiceChannel) {
+        if (!url) {
+            return
+        }
+        if (this.musicServer.songs.isEmpty()) {
+            this.skipPlay(url, voiceChannel);
+        } else {
+            await this.addSong(url, true);
+            this.musicServer.songs.push('dummy');
+            await this.musicServer.connection.dispatcher.end();
         }
     }
 
@@ -63,12 +79,11 @@ class MusicPlayService {
      * @param voiceChannel the voice channel that the bot require to join
      */
     async join(voiceChannel) {
-        if (this.musicServer.voiceChannel != null && this.musicServer.voiceChannel == voiceChannel) {
-            return;
-        } else if (this.musicServer.voiceChannel != null) {
+        if (this.musicServer.voiceChannel != null && this.musicServer.voiceChannel != voiceChannel) {
             this.leave();
         }
         try {
+            console.log('try to join voice channel: ', voiceChannel.name);
             this.musicServer.voiceChannel = voiceChannel;
             let connection = await voiceChannel.join();
             this.musicServer.connection = connection;
@@ -82,7 +97,7 @@ class MusicPlayService {
      * Skip a song in the playlist
      */
     async skip() {
-        if (this.musicServer.songs.length != 0 && this.musicServer.connection) {
+        if (this.musicServer.connection && this.musicServer.connection.dispatcher) {
             await this.musicServer.connection.dispatcher.end();
         }
     }
@@ -91,8 +106,8 @@ class MusicPlayService {
      * terminate and delete all the song in the playlist
      */
     skipAll() {
-        if (this.musicServer.songs.length != 0 && this.musicServer.connection) {
-            this.musicServer.songs = [];
+        this.musicServer.songs.removeAll();
+        if (this.musicServer.connection && this.musicServer.connection.dispatcher) {
             this.musicServer.connection.dispatcher.end();
         }
     }
@@ -112,12 +127,12 @@ class MusicPlayService {
      * Play the song on the top of the list
      */
     async execute() {
-        if (this.musicServer.songs.length != 0) {
-            console.log('start to play music: ', this.musicServer.songs[0]);
-            const dispatcher = this.musicServer.connection.playStream(ytdl(this.musicServer.songs[0].url))
+        if (!this.musicServer.songs.isEmpty()) {
+            console.log('start to play music: ', this.musicServer.songs.peek());
+            const dispatcher = this.musicServer.connection.playStream(ytdl(this.musicServer.songs.peek().url, { filter: 'audioonly' }))
                 .on('end', () => {
-                    console.log('music ended: ', this.musicServer.songs[0]);
-                    this.musicServer.songs.shift();
+                    console.log('music ended: ', this.musicServer.songs.peek());
+                    this.musicServer.songs.pop();
                     this.execute();
                 })
                 .on('error', error => {
@@ -131,21 +146,18 @@ class MusicPlayService {
      * Add a song to the queue by url
      * @param {String} url 
      */
-    async addSong(url) {
+    async addSong(url, toFront=false) {
         const songInfo = await ytdl.getInfo(url);
         const song = {
             title: songInfo.title,
             url: songInfo.video_url,
         };
-        this.musicServer.songs.push(song);    
+        if (!toFront) {
+            this.musicServer.songs.append(song);  
+        } else {
+            this.musicServer.songs.push(song);
+        }
     }    
-    
-    /**
-     * get all the song currently in the queue
-     */
-    getPlayList() {
-        return this.musicServer.songs;
-    }
 }
 
 exports.MusicPlayService = MusicPlayService;
