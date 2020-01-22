@@ -168,11 +168,15 @@ class MusicPlayService {
      */
     async addSong(url, toFront=false) {
         const song = await this.extractSongFromUrl(url);
+        if (!song) {
+            return false;
+        }
         if (!toFront) {
             this.musicServer.songs.append(song);  
         } else {
             this.musicServer.songs.push(song);
         }
+        return true;
     }
 
     /**
@@ -180,12 +184,16 @@ class MusicPlayService {
      * @param {string} url
      */
     async extractSongFromUrl(url) {
-        const songInfo = await ytdl.getInfo(url);
-        const song = {
-            title: songInfo.title,
-            url: songInfo.video_url,
-        };
-        return song
+        try {
+            const songInfo = await ytdl.getInfo(url);
+            const song = {
+                title: songInfo.title,
+                url: songInfo.video_url,
+            };
+            return song;
+        } catch {
+            return null;
+        }
     }
 }
 

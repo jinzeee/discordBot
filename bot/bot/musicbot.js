@@ -38,6 +38,9 @@ class MusicBot extends CommandHandler {
             const url = msg.content.split(' ')[1];
             let res = true;
             const song = await this.musicPlayService.extractSongFromUrl(url);
+            if (!song) {
+                return;
+            }
             if (this.vote) {
                 const voteRes = await this.voteService.createVote(msg, 'poll', `Do you want to play the song ${song.title} ? `);
                 msg.channel.send(`vote result (play the song ${song.title}) \n -- agree: ${voteRes.yes} -- disagree: ${voteRes.no} --`);
@@ -62,8 +65,11 @@ class MusicBot extends CommandHandler {
             const url = msg.content.split(' ')[1];
             let res = true;
             const song = await this.musicPlayService.extractSongFromUrl(url);
+            if (!song) {
+                return;
+            }
             if (this.vote) {
-                const voteRes = await this.voteService.createVote(msg, 'poll', `Do you want to add the song ${song.title} to tge playlist? `);
+                const voteRes = await this.voteService.createVote(msg, 'poll', `Do you want to add the song ${song.title} to the playlist? `);
                 msg.channel.send(`vote result (add song ${song.title} to the playlist) \n -- agree: ${voteRes.yes} -- disagree: ${voteRes.no} --`);
                 res = voteRes.yes > voteRes.no;
             }
