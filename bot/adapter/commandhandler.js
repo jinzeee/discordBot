@@ -17,12 +17,6 @@ class CommandHandler {
             handler(msg);
         });
     }
-
-    cmdList() {
-        this.handlers.forEach((k, v) => {
-
-        })
-    }
 }
 
 exports.CommandHandler = CommandHandler;

@@ -33,7 +33,6 @@ class Queue {
     }
 
     push(e) {
-        console.log('added the song to the front');
         let node = new Node(e);
         node.next = this.head.next;
         this.head.next = node;
@@ -47,12 +46,16 @@ class Queue {
             idx--;
         }
         if (cur.next == null) {
-            return false;
+            return null;
         }
         let res = cur.next
-        cur = cur.next.next;
+        if (res == this.tail) {
+            this.tail = cur;
+        }
+        cur.next = cur.next.next;
         this.size--;
-        return res;
+        console.log(res.value);
+        return res.value;
     }
 
     removeAll() {

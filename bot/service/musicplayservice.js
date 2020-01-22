@@ -103,6 +103,26 @@ class MusicPlayService {
     }
 
     /**
+     * return the length of the playlist
+     */
+    length() {
+        return this.musicServer.songs.size;
+    }
+
+    /**
+     * remove a song from the playlist at given index and return the song info
+     * @param {Int} idx the index of the song in the playlist
+     */
+    async remove(idx=1) {
+        if (idx == 1) {
+            let res = this.musicServer.songs.peek();
+            await this.skip();
+            return res;
+        }
+        return this.musicServer.songs.remove(idx);        
+    }
+
+    /**
      * terminate and delete all the song in the playlist
      */
     skipAll() {
@@ -144,20 +164,29 @@ class MusicPlayService {
 
     /**
      * Add a song to the queue by url
-     * @param {String} url 
+     * @param {string} url 
      */
     async addSong(url, toFront=false) {
-        const songInfo = await ytdl.getInfo(url);
-        const song = {
-            title: songInfo.title,
-            url: songInfo.video_url,
-        };
+        const song = await this.extractSongFromUrl(url);
         if (!toFront) {
             this.musicServer.songs.append(song);  
         } else {
             this.musicServer.songs.push(song);
         }
-    }    
+    }
+
+    /**
+     * extract the song info from the url
+     * @param {string} url
+     */
+    async extractSongFromUrl(url) {
+        const songInfo = await ytdl.getInfo(url);
+        const song = {
+            title: songInfo.title,
+            url: songInfo.video_url,
+        };
+        return song
+    }
 }
 
 exports.MusicPlayService = MusicPlayService;
