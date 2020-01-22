@@ -10,7 +10,7 @@ class VoteService {
         await pollMessage.react('❎');
         const result = await pollMessage.awaitReactions(
             reaction => reaction.emoji.name === '✅' || reaction.emoji.name === '❎', 
-            { time : 5000 }
+            { time : 10000 }
         );
         let agreeCount = 0;
         let disagreeCount = 0;
