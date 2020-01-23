@@ -74,7 +74,7 @@ class MusicBot extends CommandHandler {
                 res = voteRes.yes > voteRes.no;
             }
             if (res) {
-                this.musicPlayService.play(url, voiceChannel);
+                this.musicPlayService.add(url, voiceChannel);
                 msg.reply(`your song ${song.title} has been added to the playlist`);
             } else {
                 msg.reply(`your song ${song.title} fails to add to the playlist`);
