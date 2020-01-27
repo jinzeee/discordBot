@@ -81,6 +81,14 @@ class MusicBot extends CommandHandler {
             }
         });
 
+        this.handle('pause', async () => {
+            this.musicPlayService.pause();
+        });
+
+        this.handle('resume', async () => {
+            this.musicPlayService.resume();
+        });
+
         this.on('join', async (msg) => { 
             const voiceChannel = msg.member.voiceChannel;
             if (!voiceChannel) {

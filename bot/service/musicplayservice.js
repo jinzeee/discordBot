@@ -143,6 +143,18 @@ class MusicPlayService {
         }
     }
 
+    pause() {
+        if (this.musicServer.connection && this.musicServer.connection.dispatcher) {
+            this.musicServer.connection.dispatcher.pause();
+        }
+    }
+
+    resume() {
+        if (this.musicServer.connection && this.musicServer.connection.dispatcher) {
+            this.musicServer.connection.dispatcher.resume();
+        }
+    }
+
     /**
      * Play the song on the top of the list
      */
