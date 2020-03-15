@@ -177,7 +177,11 @@ class MusicPlayService {
     async execute() {
         if (!this.musicServer.songs.isEmpty()) {
             console.log('start to play music: ', this.musicServer.songs.peek());
-            const dispatcher = this.musicServer.connection.playStream(ytdl(this.musicServer.songs.peek().url, { filter: 'audioonly' }))
+            const dispatcher = this.musicServer.connection.playStream(ytdl(this.musicServer.songs.peek().url, 
+                {
+                    filter: 'audioonly',
+                    highWaterMark: 1<<25 
+                }))
                 .on('end', () => {
                     console.log('music ended: ', this.musicServer.songs.peek());
                     this.musicServer.songs.pop();
