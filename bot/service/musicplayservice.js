@@ -149,6 +149,10 @@ class MusicPlayService {
         }
     }
 
+    getVolume() {
+        return this.musicServer.volume;
+    }
+
     /**
      * puase the current song
      */

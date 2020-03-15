@@ -115,13 +115,13 @@ class MusicBot extends CommandHandler {
                     return msg.reply('Why do you want to hurt your ear?');
                 } else {
                     this.musicPlayService.setVolume(volume);
-                    const occupied = '#';
-                    const empty = '-';
-                    const volumePercentage = Math.ceil(volume / 5 * 10);
-                    return msg.channel.send('Current Volume: [' + occupied.repeat(volumePercentage) 
-                                    + empty.repeat(10 - volumePercentage) + ']');
                 }
             }
+            volume = this.musicPlayService.getVolume();
+            const occupied = '#';
+            const empty = '-';
+            const volumePercentage = Math.ceil(volume / 5 * 10);
+            return msg.channel.send('Current Volume: [' + occupied.repeat(volumePercentage) + empty.repeat(10 - volumePercentage) + ']');
         });
 
         this.on('remove', async (msg) => {
