@@ -8,6 +8,9 @@ class Playlist extends Queue {
 
     pop() {
         let e = super.pop();
+        if (!e) {
+            return null;
+        }
         switch (this.status) {
             case 'repeat':
                 super.push(e);
