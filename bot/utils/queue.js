@@ -25,6 +25,10 @@ class Queue {
         return res.value;
     }
 
+    /**
+     * append the element to the end of the queue
+     * @param {*} e 
+     */
     append(e) {
         let node = new Node(e);
         this.tail.next = node;
@@ -32,6 +36,10 @@ class Queue {
         this.size++;
     }
 
+    /**
+     * append the given element to the head of the queue
+     * @param {*} e 
+     */
     push(e) {
         let node = new Node(e);
         node.next = this.head.next;
@@ -39,7 +47,7 @@ class Queue {
         this.size++;
     }
 
-    remove(idx) {
+    remove(idx=1) {
         let cur = this.head;
         while (idx != 1 && cur.next != null) {
             cur = cur.next;
@@ -73,7 +81,7 @@ class Queue {
 
     shift(times=1) {
         while (times != 0) {
-            let temp = this.pop();
+            let temp = this.remove();
             this.append(temp);
             times--;
         }

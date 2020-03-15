@@ -2,7 +2,8 @@
 const { CommandHandler } = require('../adapter/commandhandler');
 const { MusicPlayService } = require('../service/musicplayservice');
 const { VoteService } = require('../service/voteservice');
-const { Queue } = require('../utils/queue');
+const { Playlist } = require('../utils/playlist');
+const { status } = require('../global');
 
 class MusicBot extends CommandHandler {
     constructor() {
@@ -13,7 +14,7 @@ class MusicBot extends CommandHandler {
         this.musicPlayService = new MusicPlayService({
             voiceChannel: null,
             connection: null,
-            songs: new Queue(),
+            songs: new Playlist(),
             volume: 3,
             status: 'defualt',
         });
@@ -163,6 +164,20 @@ class MusicBot extends CommandHandler {
                 (k, v) => res.push(`\t\t${k[0]}\n`)
             );
             msg.channel.send(res.join(''));
+        });
+
+        this.on('status', (msg) => {
+            const args = msg.content.split(' ')
+            if (args.length == 1) {
+                return msg.reply(`Current status: ${ this.musicPlayService.getStatus() } \n Available status: [ repeat | loop | defualt ]`);
+            }
+            let inputStatus = args[1].toLowerCase();
+            if (!Object.values(status).includes(inputStatus)) {
+                return msg.reply('Invalid status... [ repeat | loop | defualt ]');
+            }
+            if (this.musicPlayService.changeStatus(inputStatus)) {
+                msg.reply(`you have changed playlist status to ${ inputStatus }`);
+            }
         });
     }
 

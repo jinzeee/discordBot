@@ -56,8 +56,11 @@ class MusicPlayService {
             this.skipPlay(url, voiceChannel);
         } else {
             await this.addSong(url, true);
-            this.musicServer.songs.push('dummy');
+            let temp = this.musicServer.songs.status;
+            this.changeStatus('repeat');
             await this.musicServer.connection.dispatcher.end();
+            // change back to the origional status
+            this.changeStatus(temp);
         }
     }
 
@@ -97,6 +100,9 @@ class MusicPlayService {
      * Skip a song in the playlist
      */
     async skip() {
+        if (this.getStatus() == 'repeat') {
+            this.musicServer.songs.shift();
+        }
         if (this.musicServer.connection && this.musicServer.connection.dispatcher) {
             await this.musicServer.connection.dispatcher.end();
         }
@@ -143,12 +149,18 @@ class MusicPlayService {
         }
     }
 
+    /**
+     * puase the current song
+     */
     pause() {
         if (this.musicServer.connection && this.musicServer.connection.dispatcher) {
             this.musicServer.connection.dispatcher.pause();
         }
     }
 
+    /**
+     * resume the current playing song
+     */
     resume() {
         if (this.musicServer.connection && this.musicServer.connection.dispatcher) {
             this.musicServer.connection.dispatcher.resume();
@@ -206,6 +218,15 @@ class MusicPlayService {
         } catch {
             return null;
         }
+    }
+
+    changeStatus(status) {
+        this.musicServer.songs.status = status;
+        return true;
+    }
+
+    getStatus() {
+        return this.musicServer.songs.status;
     }
 }
 
